@@ -10,3 +10,4 @@ def home():
 def health():
     return jsonify(status="ok")
 
+
