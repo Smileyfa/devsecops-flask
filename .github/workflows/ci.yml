@@ -50,8 +50,10 @@ jobs:
       # 4) Build Docker Image
       - name: Set image name
         id: vars
-        run: echo "IMAGE=ghcr.io/${{ github.repository_owner }}/devsecops-flask:${{ github.sha }}" >> $GITHUB_OUTPUT
-
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$OWNER/devsecops-flask:${{ github.sha }}" >> $GITHUB_OUTPUT
+          
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
