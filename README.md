@@ -199,35 +199,35 @@ If it didn’t break — you didn’t learn.
 
 ```mermaid
 flowchart LR
-    Dev([Developer Pushes Code]) --> GitHubRepo[(GitHub Repository)]
+    Dev([Developer]) --> Repo[(GitHub Repo)]
 
-    GitHubRepo --> CI{GitHub Actions - CI}
+    Repo --> CI{CI Pipeline}
 
-    CI --> Gitleaks[Secret Scan<br/>Gitleaks]
-    Gitleaks --> Semgrep[SAST<br/>Semgrep]
-    Semgrep --> Snyk[SCA<br/>Snyk]
-    Snyk --> DockerBuild[Docker Build]
-    DockerBuild --> Trivy[Container Scan<br/>Trivy]
+    CI --> S1["🔐 Gitleaks<br/>(Secrets)"]
+    S1 --> S2["📋 Semgrep<br/>(SAST)"]
+    S2 --> S3["📦 Snyk<br/>(Dependencies)"]
+    S3 --> S4["🐳 Docker Build"]
+    S4 --> S5["🔍 Trivy<br/>(Container)"]
 
-    Trivy -->|✓ Pass| GHCR[(GitHub Container<br/>Registry)]
-    Trivy -->|✗ Fail| StopCI[❌ Pipeline Fails]
+    S5 -->|PASS| GHCR[(GHCR)]
+    S5 -->|FAIL| Stop["❌ Stop"]
 
-    GHCR --> CD{GitHub Actions - CD}
-    CD --> Kubectl[kubectl apply]
+    GHCR --> CD{CD Pipeline}
+    CD --> Deploy["kubectl apply"]
 
-    Kubectl --> K8s[(Kubernetes<br/>k3s on AWS EC2)]
-    K8s --> Pod[Flask App Pod]
-    Pod --> Service[NodePort Service]
-    Service --> User([Browser Access])
+    Deploy --> K8s["Kubernetes<br/>k3s / AWS"]
+    K8s --> Pod["Flask Pod"]
+    Pod --> Service["NodePort<br/>Service"]
+    Service --> User([Browser])
     
-    style Dev fill:#90EE90
-    style GitHubRepo fill:#87CEEB
-    style CI fill:#FFD700
-    style CD fill:#FFD700
-    style GHCR fill:#87CEEB
-    style K8s fill:#FF6347
-    style Pod fill:#DDA0DD
-    style Service fill:#DDA0DD
-    style User fill:#90EE90
-    style StopCI fill:#FF4444
+    style Dev fill:#90EE90,color:#000
+    style Repo fill:#87CEEB,color:#000
+    style CI fill:#FFD700,color:#000
+    style CD fill:#FFD700,color:#000
+    style GHCR fill:#87CEEB,color:#000
+    style K8s fill:#FF6347,color:#fff
+    style Pod fill:#DDA0DD,color:#000
+    style Service fill:#DDA0DD,color:#000
+    style User fill:#90EE90,color:#000
+    style StopCI fill:#FF4444,color:#fff
 ```
