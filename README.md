@@ -196,3 +196,25 @@ This project reflects **real DevSecOps engineering**, including mistakes, fixes,
 
 If it didn’t break — you didn’t learn.
 
+
+flowchart LR
+    Dev[Developer Pushes Code] --> GitHubRepo[GitHub Repository]
+
+    GitHubRepo --> CI[GitHub Actions - CI]
+
+    CI --> Gitleaks[Secret Scan - Gitleaks]
+    Gitleaks --> Semgrep[SAST - Semgrep]
+    Semgrep --> Snyk[SCA - Snyk]
+    Snyk --> DockerBuild[Docker Build]
+    DockerBuild --> Trivy[Container Scan - Trivy]
+
+    Trivy -->|Pass| GHCR[GitHub Container Registry]
+    Trivy -->|Fail| StopCI[Pipeline Fails]
+
+    GHCR --> CD[GitHub Actions - CD]
+    CD --> Kubectl[kubectl apply]
+
+    Kubectl --> K8s[Kubernetes (k3s on AWS EC2)]
+    K8s --> Pod[Flask App Pod]
+    Pod --> Service[NodePort Service]
+    Service --> User[Browser Access]
