@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -26,11 +26,20 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
 
-      - name: Set image tag (force lowercase owner)
+      - name: Set image tag (works for workflow_run + workflow_dispatch)
         id: vars
+        shell: bash
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE=ghcr.io/$OWNER/devsecops-flask:${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            SHA="${{ github.event.workflow_run.head_sha }}"
+          else
+            SHA="${{ github.sha }}"
+          fi
+
+          echo "IMAGE=ghcr.io/$OWNER/devsecops-flask:$SHA" >> $GITHUB_OUTPUT
+          echo "Using image: ghcr.io/$OWNER/devsecops-flask:$SHA"
 
       - name: Deploy to Kubernetes
         run: |
