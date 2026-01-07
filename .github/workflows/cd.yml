@@ -2,7 +2,7 @@ name: CD - Deploy to Kubernetes
 
 on:
   workflow_run:
-    workflows: ["Complete Job"]
+    workflows: ["CI - DevSecOps Scans + Build"]
     types: [completed]
 
 permissions:
