@@ -1,0 +1,41 @@
+name: CD - Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["Complete Job"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+
+      - name: Set image tag (force lowercase owner)
+        id: vars
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$OWNER/devsecops-flask:${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          sed "s|IMAGE_PLACEHOLDER|${{ steps.vars.outputs.IMAGE }}|g" k8s/deployment.yaml | kubectl apply -f -
+          kubectl apply -f k8s/service.yaml
+
+      - name: Check rollout
+        run: kubectl -n demo rollout status deployment/flask-app
