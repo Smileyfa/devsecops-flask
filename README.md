@@ -197,24 +197,37 @@ This project reflects **real DevSecOps engineering**, including mistakes, fixes,
 If it didn’t break — you didn’t learn.
 
 
+```mermaid
 flowchart LR
-    Dev[Developer Pushes Code] --> GitHubRepo[GitHub Repository]
+    Dev([Developer Pushes Code]) --> GitHubRepo[(GitHub Repository)]
 
-    GitHubRepo --> CI[GitHub Actions - CI]
+    GitHubRepo --> CI{GitHub Actions - CI}
 
-    CI --> Gitleaks[Secret Scan - Gitleaks]
-    Gitleaks --> Semgrep[SAST - Semgrep]
-    Semgrep --> Snyk[SCA - Snyk]
+    CI --> Gitleaks[Secret Scan<br/>Gitleaks]
+    Gitleaks --> Semgrep[SAST<br/>Semgrep]
+    Semgrep --> Snyk[SCA<br/>Snyk]
     Snyk --> DockerBuild[Docker Build]
-    DockerBuild --> Trivy[Container Scan - Trivy]
+    DockerBuild --> Trivy[Container Scan<br/>Trivy]
 
-    Trivy -->|Pass| GHCR[GitHub Container Registry]
-    Trivy -->|Fail| StopCI[Pipeline Fails]
+    Trivy -->|✓ Pass| GHCR[(GitHub Container<br/>Registry)]
+    Trivy -->|✗ Fail| StopCI[❌ Pipeline Fails]
 
-    GHCR --> CD[GitHub Actions - CD]
+    GHCR --> CD{GitHub Actions - CD}
     CD --> Kubectl[kubectl apply]
 
-    Kubectl --> K8s[Kubernetes (k3s on AWS EC2)]
+    Kubectl --> K8s[(Kubernetes<br/>k3s on AWS EC2)]
     K8s --> Pod[Flask App Pod]
     Pod --> Service[NodePort Service]
-    Service --> User[Browser Access]
+    Service --> User([Browser Access])
+    
+    style Dev fill:#90EE90
+    style GitHubRepo fill:#87CEEB
+    style CI fill:#FFD700
+    style CD fill:#FFD700
+    style GHCR fill:#87CEEB
+    style K8s fill:#FF6347
+    style Pod fill:#DDA0DD
+    style Service fill:#DDA0DD
+    style User fill:#90EE90
+    style StopCI fill:#FF4444
+```
