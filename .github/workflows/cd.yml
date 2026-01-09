@@ -8,10 +8,11 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +26,7 @@ jobs:
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
 
       - name: Set image tag (works for workflow_run + workflow_dispatch)
         id: vars
@@ -44,8 +46,8 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f k8s/namespace.yaml
-          sed "s|IMAGE_PLACEHOLDER|${{ steps.vars.outputs.IMAGE }}|g" k8s/deployment.yaml | kubectl apply -f -
           kubectl apply -f k8s/service.yaml
+          sed "s|IMAGE_PLACEHOLDER|${{ steps.vars.outputs.IMAGE }}|g" k8s/deployment.yaml | kubectl apply -f -
 
       - name: Check rollout
-        run: kubectl -n demo rollout status deployment/flask-app
+        run: kubectl -n dev rollout status deployment/flask-app --timeout=180s
